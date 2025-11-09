@@ -20,14 +20,26 @@ jobs:
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: "stable"
+          # Fix: forcer une version Flutter connue
+          flutter-version: "3.22.2"
+          channel: "stable"
           cache: true
 
-      - name: Flutter doctor
-        run: flutter doctor -v
+      - name: Flutter version
+        run: flutter --version
+
+      # Si le dossier android/ n'existe pas, on le crée automatiquement
+      - name: Ensure Android platform exists
+        run: |
+          if [ ! -d "android" ]; then
+            flutter create --platforms=android --org com.tatacamsolaire .
+          fi
 
       - name: Get dependencies
         run: flutter pub get
+
+      - name: Analyze
+        run: flutter analyze
 
       - name: Build APK (debug)
         run: flutter build apk --debug
@@ -35,5 +47,5 @@ jobs:
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
-          name: app-debug.apk 
+          name: app-debug.apk
           path: build/app/outputs/flutter-apk/app-debug.apk
